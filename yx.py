@@ -67,5 +67,7 @@ class dm():
 
     @property
     def addresses(self):
-        with open('user.txt', 'r') as f:
+        import os 
+        path = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(path,'user.txt'), 'r') as f:
             return [line.replace('\n', '') for line in f]
