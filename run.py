@@ -10,4 +10,4 @@ output_message = '\n'.join(
      yxdm.get_detail(dm_list) if name is not None])
 
 # 发送邮件
-my_mail_fyx = send_mail(output_message, yxdm.addresses)
+my_mail_fyx = send_mail('test', yxdm.addresses)

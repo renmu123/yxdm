@@ -70,4 +70,4 @@ class dm():
         import os 
         path = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(path,'user.txt'), 'r') as f:
-            return [line.replace('\n', '') for line in f]
+            return f.readlines()[0]
