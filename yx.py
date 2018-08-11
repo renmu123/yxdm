@@ -1,8 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import datetime
-from mail import send_mail
-
+import time
 
 class dm():
     def __init__(self):
@@ -30,40 +29,31 @@ class dm():
                     dm_dict[name] = url
         return dm_dict
 
-    #   过滤
-    def filter_url(self, url_dict):
-        necessary = ['食戟之灵第三季', '咕噜咕噜魔法阵第三季']
-        dm_dict = {}
-        for i in necessary:
-            if i in url_dict:
-                dm_dict[i] = url_dict[i]
-        return dm_dict
-
     def get_detail(self, dm_lists):
         for name, url in dm_lists.items():
             try:
-                r = requests.get(url, headers=self.headers)
-                r.encoding = r.apparent_encoding
-                soup = BeautifulSoup(r.text, 'lxml')
+                id = url.replace('http://www.yxdm.tv/resource/', '').replace('.html', '')
 
-                series = soup.find('div', class_='down-content xzdis')
-                series_name = series.find('a').get_text()
-                pan_url = self._get_pan_url(series.find('a')['href'])  # 获得网盘链接
+                pan_url, series_name = self._get_pan_url(id)  # 获得网盘链接
                 pan_password = pan_url.split('@@')[-1]
-                # time = soup.find('ul', class_='info1-left').find_all('li')[-1].find('p').get_text().strip()
+
                 if len(pan_password) != 4:
-                    password = ''
-            except AttributeError:
+                    pan_password = ''
+            except (AttributeError, KeyError):
                 name, series_name, pan_url, pan_password = None, None, None, None
 
             yield name, series_name, pan_url, pan_password
 
-    def _get_pan_url(self, url):
-        r = requests.get(url, headers=self.headers)
-        r.encoding = r.apparent_encoding
+    def _get_pan_url(self, id):
+        r = requests.get('http://www.yxdm.tv/getdlist.php', params={'id':id}, headers=self.headers).json()
+
+        url = r['data'][0]['list'][0]['url']
+        title = r['data'][0]['list'][0]['title']
+
+        r = requests.get('http://animewld.club/s.php', params={'url': url}, headers=self.headers)
         soup = BeautifulSoup(r.text, 'lxml')
-        url = soup.find('div', id="down").find('a')['href']
-        return url
+        pan_url = soup.find('div', id="down").find('a')['href']
+        return pan_url, title
 
     @property
     def addresses(self):
